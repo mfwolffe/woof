@@ -11,7 +11,7 @@ test_watch() {
     eval "$COMMAND"
 
     # if [ $PRIDE_FLAG -eq 1 ]; then
-    #     eval "$COMMAND | lolcat-rs ";
+    #     eval "$COMMAND | lolcat ";
     #     else
     #     eval "$COMMAND";
     # fi

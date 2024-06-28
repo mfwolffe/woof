@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO @mfwolffe make this behave similarly to arch version
+
 install_brew() {
   echo "Package ascii-image-converter is required to run woof, which can be installed with Homebrew (https://brew.sh/)"
   read -p "Attempt to install Homebrew? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
@@ -12,9 +14,6 @@ make_aliases() {
   echo 'alias woof="$1/woof.sh"' >> ~/.zshrc
   echo 'alias woof-proud="$1/woof.sh -p"' >> ~/.zshrc
 } 
-
-echo "~~~~~~~~~ Installing prerequisites for woof ~~~~~~~~~"
-printf "\nNOTE:\n\tThis script is intended for myself only really, as\n\treminding myself of/performing setup for each OS I use is annoying\n"
 
 printf "\nInstalling required package:\n\tascii-image-converter (author: TheZoraiz; https://github.com/TheZoraiz/ascii-image-converter)\n"
 read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1

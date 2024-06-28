@@ -101,7 +101,7 @@ AIC_CL_FLAGS="${FILENAME} ${AIC_CL_FLAGS}"
 COMMAND="ascii-image-converter ${AIC_CL_FLAGS}"
 
 if [ $PRIDE_FLAG -eq 1 ]; then
-    eval "$COMMAND | lolcat-rs "
+    eval "$COMMAND | lolcat"
     exit 0
 fi
 
@@ -121,7 +121,7 @@ eval "$COMMAND" || echo "Script failed. check file names/paths, and/or flags"
 #         COMMAND="ascii-image-converter ${AIC_CL_FLAGS}";
 
 #         if [ $PRIDE_FLAG -eq 1 ]; then
-#             eval "$COMMAND | lolcat-rs ";
+#             eval "$COMMAND | lolcat";
 #             else
 #             eval "$COMMAND";
 #         fi
