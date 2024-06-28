@@ -1,9 +1,13 @@
 #!/bin/bash
 
 # TODO: long args - debug, pride, what else?
-OPTSTRING=":bcdghl:npx"
-DOGGOSDIR="/home/mfwolffe/Pictures/moby"
-PICTCOUNT=$(ls /home/mfwolffe/Pictures/moby -l | wc -l)
+OPTSTRING=":bcdghl:npxw:"
+
+WFSRC_DIR=$(find ~/ -type d -name woof)
+ARCH_DIR="${WFSRC_DIR}/src/archive"
+
+DOGGOSDIR="${ARCH_DIR}/moby"
+PICTCOUNT=$(ls $DOGOOSDIR -l | wc -l)
 
 # flags for CLI option validation
 COLOR_FLAG=0
@@ -21,15 +25,16 @@ usage()
 {
     echo "This utility picks a random photo of Moby the border-aussie and generates ascii art from it."
     echo "USAGE: woof [options]"
-    echo "  -c     |  color mode"
-    echo "  -b     |  braille mode"
-    echo "  -n     |  invert colors"
-    echo "  -p     |  celebrate pride!"
-    echo "  -h     |  show program usage"
-    echo "  -g     |  background-color mode"
-    echo "  -x     |  use wider range of characters"
-    echo "  -d     |  dither mode (requires -b passed)"
-    echo "  -l <N> |  repeat this command indefinitely every N seconds"
+    echo "  -c       |  color mode"
+    echo "  -b       |  braille mode"
+    echo "  -n       |  invert colors"
+    echo "  -p       |  celebrate pride!"
+    echo "  -h       |  show program usage"
+    echo "  -g       |  background-color mode"
+    echo "  -x       |  use wider range of characters"
+    echo "  -d       |  dither mode (requires -b passed)"
+    echo "  -l <N>   |  repeat this command indefinitely every N seconds"
+    echo "  -w <dir> |  use <dir> as source for pupper photos. Defaults to $DOGGOSDIR"
     echo
     exit $1
 }
