@@ -18,12 +18,13 @@ pacman_cat() {
 }
 
 add_archives() {
-    printf "All dependencies fulfilled\n\n"
+    printf "All dependencies fulfilled.\n\n"
+    # TODO mfwolffe maybe make this a separate script since this code will be reused
     read -p "Proceed to archive selection? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
     printf "PUPPER SELECTION:\n"
     printf "\tBy default, woof uses photos of Moby the border-aussie; the archive is curled from a\n"
     printf "\t'public' google drive folder. Other/multiple pups may be selected. Options are:\n" 
-    printf "\t\tTilly the silly, Bella the beauty, Twinky the winky, and the Daschund Duo.\n\n"
+    printf "\t\tTilly the silly, Bella the beauty, Twinky the winky, and the Dachshund Duo.\n\n"
 
     # TODO @mfwolffe once you have real ID's for the other pups, 
     # uncomment and finish this multiple selection approach
@@ -45,13 +46,13 @@ add_archives() {
     PUPID="bad_id"
 
     while true; do
-        read -p "Select a pup: [1] - Moby, [2] - Tilly, [3] Bella, [4] - Twinky, [5] - Daschunds, [A]bort: " pup
+        read -p "Select a pup: [1] - Moby, [2] - Tilly, [3] Bella, [4] - Twinky, [5] - Dachshunds, [A]bort: " pup
         case "$pup" in
-            [1]* ) echo Moby selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
-            [2]* ) echo Tilly selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
-            [3]* ) echo Bella selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
-            [4]* ) echo Twinky selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
-            [5]* ) echo Daschunds selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK" ;;
+            [1]* ) echo Moby selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
+            [2]* ) echo Tilly selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
+            [3]* ) echo Bella selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
+            [4]* ) echo Twinky selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
+            [5]* ) echo Dachshunds selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy" ;;
             [Aa]* ) echo "Aborting"; exit 0;;
             * ) echo "Invalid choice: $pup" 
         esac
@@ -73,12 +74,22 @@ add_archives() {
         printf "\nArchive will now be curled from google drive and stored in:\n"
         printf "\t$ARCH_DIR \n"
         read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
+
         printf "\nRunning:\n"
-        printf "\tcurl \"https://drive.usercontent.google.com/download?id={1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK}&confirm=xxx\" -o moby.tar.gz"
-        curl "https://drive.usercontent.google.com/download?id={1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK}&confirm=xxx" -o "$ARCH_DIR/moby.tar.gz" || exit 1
-        echo "Archive added successfully."
+        printf "\tcurl \"https://drive.usercontent.google.com/download?id={1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy}&confirm=xxx\" -o moby.tar.gz"
+        curl "https://drive.usercontent.google.com/download?id={1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy}&confirm=xxx" -o "$ARCH_DIR/moby.tar.gz" || exit 1
+        printf "Archive added successfully.\n"
     fi
 
+    if [ ! -d "$ARCH_DIR/moby" ]; then
+        read -p "Unzip archive? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
+        printf "\nRunning:\n"
+        printf "\ttar xvzf \"$ARCH_DIR/moby.tar.gz\" -C $ARCH_DIR\n"
+        tar xvzf "$ARCH_DIR/moby.tar.gz" -C $ARCH_DIR || exit 1
+        printf "Archive unzipped\n"
+    else
+        printf "Archive already unzipped\n"
+    fi
     exit 0
 }
 
@@ -105,7 +116,7 @@ printf "\nAttempting install of required package:\n\tlolcat\n"
 RUST_IMPLMNT=$(command -v lolcat-rs)
 
 if [[ $(command -v lolcat) || $RUST_IMPLMNT ]]; then
-    printf "\nlolcat already present on system.\n\n"
+    printf "\nlolcat already present on system.\n"
     read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
     printf "Checking if rust substitutions needed.\n\n"
 
