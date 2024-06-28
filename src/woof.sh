@@ -1,18 +1,19 @@
 #!/bin/bash
 
-# TODO: long args - debug, pride, what else?
-OPTSTRING=":bcdghl:npxw:"
-
 WFSRC_DIR=$(find ~/ -type d -name woof)
 ARCH_DIR="${WFSRC_DIR}/src/archive"
 
 DOGGOSDIR="${ARCH_DIR}/moby"
-PICTCOUNT=$(ls $DOGOOSDIR -l | wc -l)
+PICTCOUNT=$(ls $DOGGOSDIR -l | wc -l)
+
+# TODO: long args - debug, pride, what else?
+OPTSTRING=":bcdghl:npxw:D"
 
 # flags for CLI option validation
 COLOR_FLAG=0
 PRIDE_FLAG=0
 DITHER_FLAG=0
+DIALUP_FLAG=0
 BRAILLE_FLAG=0
 
 # how long to wait before rerunning
@@ -33,6 +34,7 @@ usage()
     echo "  -g       |  background-color mode"
     echo "  -x       |  use wider range of characters"
     echo "  -d       |  dither mode (requires -b passed)"
+    echo "  -D       |  dialup mode (load image line by line)"
     echo "  -l <N>   |  repeat this command indefinitely every N seconds"
     echo "  -w <dir> |  use <dir> as source for pupper photos. Defaults to $DOGGOSDIR"
     echo
@@ -56,6 +58,9 @@ while getopts ${OPTSTRING} opt; do
         d)
             AIC_CL_FLAGS="${AIC_CL_FLAGS} --dither"
             DITHER_FLAG=1
+            ;;
+        D)
+            DIALUP_FLAG=1
             ;;
         g)
             AIC_CL_FLAGS="${AIC_CL_FLAGS} --color-bg"
@@ -92,6 +97,11 @@ if [ $DITHER_FLAG -eq 1 -a $BRAILLE_FLAG -eq 0 ]; then
     usage 1
 fi
 
+if [ $DIALUP_FLAG -eq 1 -a $PRIDE_FLAG -eq 0 ]; then
+    echo "ERROR: dialup is reserved for use with pride mode"
+    usage 1
+fi
+
 PICNUM=$(shuf -i 1-${PICTCOUNT} -n 1)
 FILENAME="${DOGGOSDIR}/${PICNUM}.jpeg"
 
@@ -106,7 +116,8 @@ AIC_CL_FLAGS="${FILENAME} ${AIC_CL_FLAGS}"
 COMMAND="ascii-image-converter ${AIC_CL_FLAGS}"
 
 if [ $PRIDE_FLAG -eq 1 ]; then
-    eval "$COMMAND | lolcat"
+    PIPE_ARGS=$([ $DIALUP_FLAG -eq 1 ] && echo "-D -f 0.4" || echo "-f 0.4")
+    eval "$COMMAND | lolcat ${PIPE_ARGS}"
     exit 0
 fi
 
