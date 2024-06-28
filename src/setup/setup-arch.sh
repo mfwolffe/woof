@@ -9,7 +9,6 @@ replace_for_rust() {
     eval "sed -i -e 's/lolcat/lolcat-rs/g' ${SCRIPT2}"
 
     echo "Substitutions completed."
-    echo "All dependencies fulfilled."
 }
 
 pacman_cat() {
@@ -18,11 +17,75 @@ pacman_cat() {
     sudo pacman -S lolcat || eval "echo 'lolcat installation failed' && exit 1"
 }
 
-read -p "ATTENTION: this is the ARCH linux version of this setup script. Continue? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
-printf "\nAttempting install of required package:\n\tascii-image-converter (author: TheZoraiz; https://github.com/TheZoraiz/ascii-image-converter)\n"
+add_archives() {
+    printf "All dependencies fulfilled\n\n"
+    read -p "Proceed to archive selection? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
+    printf "PUPPER SELECTION:\n"
+    printf "\tBy default, woof uses photos of Moby the border-aussie; the archive is curled from a\n"
+    printf "\t'public' google drive folder. Other/multiple pups may be selected. Options are:\n" 
+    printf "\t\tTilly the silly, Bella the beauty, Twinky the winky, and the Daschund Duo.\n\n"
 
+    # TODO @mfwolffe once you have real ID's for the other pups, 
+    # uncomment and finish this multiple selection approach
+    #
+    # while true; do
+    #     read -p "Do your Choice: [1] [2] [3] [4] [5] [A]bort: " -a pup_array
+    #     for pup in "${pup_array[@]}"; do
+    #         case "$pup" in
+    #             [1]* ) echo "$pup selected";;
+    #             [2]* ) echo "$pup selected";;
+    #             [3]* ) echo "$pup selected";;
+    #             [4]* ) echo "$pup selected";;
+    #             [Ee]* ) echo "Aborting"; exit;;
+    #             * ) echo "Invalid choice: $pup";;
+    #         esac
+    #     done
+    # done
+
+    PUPID="bad_id"
+
+    while true; do
+        read -p "Select a pup: [1] - Moby, [2] - Tilly, [3] Bella, [4] - Twinky, [5] - Daschunds, [A]bort: " pup
+        case "$pup" in
+            [1]* ) echo Moby selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
+            [2]* ) echo Tilly selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
+            [3]* ) echo Bella selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
+            [4]* ) echo Twinky selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK"; break;;
+            [5]* ) echo Daschunds selected; PUPID="1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK" ;;
+            [Aa]* ) echo "Aborting"; exit 0;;
+            * ) echo "Invalid choice: $pup" 
+        esac
+    done
+
+    # echo "$PUPID"
+
+    WFSRC_DIR=$(find ~/ -type d -name woof)
+    ARCH_DIR="${WFSRC_DIR}/src/archive"
+
+    if [ ! -d "$ARCH_DIR" ]; then
+        mkdir "$ARCH_DIR"
+    fi
+
+    if [ -f "$ARCH_DIR/moby.tar.gz" ]; then
+        echo "Archive already exists"
+        # TODO @mfwolffe option to remove & replace
+    else
+        printf "\nArchive will now be curled from google drive and stored in:\n"
+        printf "\t$ARCH_DIR \n"
+        read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
+        printf "\nRunning:\n"
+        printf "\tcurl \"https://drive.usercontent.google.com/download?id={1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK}&confirm=xxx\" -o moby.tar.gz"
+        curl "https://drive.usercontent.google.com/download?id={1LfRaVFfr_qUc5yG0ENspRSneiFeL85dK}&confirm=xxx" -o "$ARCH_DIR/moby.tar.gz" || exit 1
+        echo "Archive added successfully."
+    fi
+
+    exit 0
+}
+
+printf "\nAttempting install of required package:\n\tascii-image-converter (author: TheZoraiz; https://github.com/TheZoraiz/ascii-image-converter)\n\n"
 if [[ $(command -v ascii-image-converter) ]]; then
-    echo "\nascii-image-converter already present on system. Proceeding..."
+    echo "ascii-image-converter already present on system."
+    read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
 else
     printf "Running: 'git clone https://aur.archlinux.org/ascii-image-converter-git.git ~/ascii-image-converter-git'\n"
     read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
@@ -42,15 +105,16 @@ printf "\nAttempting install of required package:\n\tlolcat\n"
 RUST_IMPLMNT=$(command -v lolcat-rs)
 
 if [[ $(command -v lolcat) || $RUST_IMPLMNT ]]; then
-    printf "\nlolcat already present on system.\nChecking if rust substitutions needed.\n"
+    printf "\nlolcat already present on system.\n\n"
+    read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
+    printf "Checking if rust substitutions needed.\n\n"
 
     if [[ $RUST_IMPLMNT ]]; then
         replace_for_rust
-        exit 0
+        add_archives
     fi
-    echo "Substitutions not needed."
-    echo "All dependencies fulfilled."
-    exit 0
+    printf "Substitutions not needed.\n"
+    add_archives
 fi
 
 if [[ $(command -v yay) ]]; then
@@ -62,14 +126,10 @@ if [[ $(command -v yay) ]]; then
     printf "Checking if rust substitutions needed.\n"
     if [[ $RUST_IMPLMNT ]]; then
         replace_for_rust
-        exit 0
     fi
     echo "Substitutions not needed."
-    echo "All dependencies fulfilled."
-    exit 0
+    add_archives
 else
     pacman_cat
+    add_archives
 fi
-
-echo "All dependencies fulfilled."
-exit 0
