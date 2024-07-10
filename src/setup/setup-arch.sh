@@ -17,14 +17,22 @@ pacman_cat() {
     sudo pacman -S lolcat || eval "echo 'lolcat installation failed' && exit 1"
 }
 
+rename_sequential() {
+    printf "\nwoof.sh requires files to be named sequentially.\n"
+    printf "Running:\n"
+    printf "\t\"num=1; for i in *; do mv \"\$i\" \"\$(printf '%d' \$num).jpeg\"; ((num++)); done"
+    num=1; for i in *; do mv "$i" "$(printf '%d' $num).jpeg"; ((num++)); done
+}
+
+
 add_archives() {
     printf "All dependencies fulfilled.\n\n"
-    # TODO mfwolffe maybe make this a separate script since this code will be reused
+    # TODO mfwolffe maybe put this back into the overall setup.sh 
     read -p "Proceed to archive selection? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
     printf "PUPPER SELECTION:\n"
     printf "\tBy default, woof uses photos of Moby the border-aussie; the archive is curled from a\n"
-    printf "\t'public' google drive folder. Other/multiple pups may be selected. Options are:\n" 
-    printf "\t\tTilly the silly, Bella the beauty, Twinky the winky, and the Dachshund Duo.\n\n"
+    printf "\t'public' google drive folder. Other pups' archives may be selected too. Options are:\n" 
+    printf "\t\tBella the Bubbly. Other pups coming soon.\n\n"
 
     # TODO @mfwolffe once you have real ID's for the other pups, 
     # uncomment and finish this multiple selection approach
@@ -44,21 +52,20 @@ add_archives() {
     # done
 
     PUPID="bad_id"
+    PUPNAME="bad_name"
 
     while true; do
-        read -p "Select a pup: [1] - Moby, [2] - Tilly, [3] Bella, [4] - Twinky, [5] - Dachshunds, [A]bort: " pup
+        read -p "Select a pup: [1] - Moby, [2] - Bella, [A]bort: " pup
         case "$pup" in
-            [1]* ) echo Moby selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
-            [2]* ) echo Tilly selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
-            [3]* ) echo Bella selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
-            [4]* ) echo Twinky selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; break;;
-            [5]* ) echo Dachshunds selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy" ;;
+            [1]* ) echo Moby selected; PUPID="1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy"; PUPNAME="moby"; break;;
+            [2]* ) echo Bella selected; PUPID="1M-xlBm1ksak-SChqDVGxSKH_JDW_Hzrv"; PUPNAME="bella"; break;;
+            # [3]* ) echo Tilly selected; PUPID=""; break;;
+            # [4]* ) echo Twinky selected; PUPID=""; break;;
+            # [5]* ) echo Dachshunds selected; PUPID="" ;;
             [Aa]* ) echo "Aborting"; exit 0;;
             * ) echo "Invalid choice: $pup" 
         esac
     done
-
-    # echo "$PUPID"
 
     WFSRC_DIR=$(find ~/ -type d -name woof)
     ARCH_DIR="${WFSRC_DIR}/src/archive"
@@ -67,7 +74,7 @@ add_archives() {
         mkdir "$ARCH_DIR"
     fi
 
-    if [ -f "$ARCH_DIR/moby.tar.gz" ]; then
+    if [ -f "$ARCH_DIR/$PUPNAME.tar.gz" ]; then
         echo "Archive already exists"
         # TODO @mfwolffe option to remove & replace
     else
@@ -76,20 +83,21 @@ add_archives() {
         read -p "Proceed? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
 
         printf "\nRunning:\n"
-        printf "\tcurl \"https://drive.usercontent.google.com/download?id={1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy}&confirm=xxx\" -o moby.tar.gz"
-        curl "https://drive.usercontent.google.com/download?id={1460H0ABkVSNwNPRWltsvDb1gufwD9Zpy}&confirm=xxx" -o "$ARCH_DIR/moby.tar.gz" || exit 1
+        printf "\tcurl \"https://drive.usercontent.google.com/download?id={${PUPID}}&confirm=xxx\" -o \"$ARCH_DIR/$PUPNAME.tar.gz\""
+        curl "https://drive.usercontent.google.com/download?id={${PUPID}}&confirm=xxx" -o "$ARCH_DIR/$PUPNAME.tar.gz" || exit 1
         printf "Archive added successfully.\n"
     fi
 
-    if [ ! -d "$ARCH_DIR/moby" ]; then
+    if [ ! -d "$ARCH_DIR/$PUPNAME" ]; then
         read -p "Unzip archive? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
         printf "\nRunning:\n"
-        printf "\ttar xvzf \"$ARCH_DIR/moby.tar.gz\" -C $ARCH_DIR\n"
-        tar xvzf "$ARCH_DIR/moby.tar.gz" -C $ARCH_DIR || exit 1
+        printf "\ttar xvzf \"$ARCH_DIR/$PUPNAME.tar.gz\" -C $ARCH_DIR\n"
+        tar xvzf "$ARCH_DIR/$PUPNAME.tar.gz" -C $ARCH_DIR || exit 1
         printf "Archive unzipped\n"
     else
         printf "Archive already unzipped\n"
     fi
+
     exit 0
 }
 
@@ -130,7 +138,7 @@ fi
 
 if [[ $(command -v yay) ]]; then
     printf "\n'yay' detected. Attempting install of rust-based implementation of lolcat:\n\tlolcat-rs (author: Umang Raghuvanshi)\n"
-    read -p "Proceed? (Y/N: use pacman instead of yay): " confirm && [[ $confirm == [yY] ]] || pacman_cat
+    read -p "Proceed? (Y: proceed with yay; N: use pacman instead of yay): " confirm && [[ $confirm == [yY] ]] || pacman_cat
     printf "Running: 'yay -S lolcat-rs'\n"
     yay -S lolcat-rs || eval "echo 'lolcat-rs installation failed' && exit 1"
 

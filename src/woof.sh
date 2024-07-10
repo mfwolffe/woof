@@ -4,10 +4,9 @@ WFSRC_DIR=$(find ~/ -type d -name woof)
 ARCH_DIR="${WFSRC_DIR}/src/archive"
 
 DOGGOSDIR="${ARCH_DIR}/moby"
-PICTCOUNT=$(ls $DOGGOSDIR -l | wc -l)
 
 # TODO: long args - debug, pride, what else?
-OPTSTRING=":bcdghl:npxw:D"
+OPTSTRING=":bcdghl:npsxw:D"
 
 # flags for CLI option validation
 COLOR_FLAG=0
@@ -24,8 +23,9 @@ AIC_CL_FLAGS=""
 
 usage()
 {
-    echo "This utility picks a random photo of Moby the border-aussie and generates ascii art from it."
+    echo "This utility picks a random photo of Moby the border-aussie (or your pup/pet of choice) and generates ascii art from it."
     echo "USAGE: woof [options]"
+    echo "OPTIONS:"
     echo "  -c       |  color mode"
     echo "  -b       |  braille mode"
     echo "  -n       |  invert colors"
@@ -35,10 +35,21 @@ usage()
     echo "  -x       |  use wider range of characters"
     echo "  -d       |  dither mode (requires -b passed)"
     echo "  -D       |  dialup mode (load image line by line)"
+    echo "  -s       |  show installed pup archives for use with -w flag"
     echo "  -l <N>   |  repeat this command indefinitely every N seconds"
-    echo "  -w <dir> |  use <dir> as source for pupper photos. Defaults to $DOGGOSDIR"
+    echo "  -w <pup> |  Choose a dog/pet from available archives. Defaults to moby"
     echo
     exit $1
+}
+
+show_pups() {
+    echo "Available pups:"
+    cd "$ARCH_DIR"
+    ls -d */ | awk -F'/' '{print $1}'
+    # printf "Select a number from the list below\n"
+    # select d in */; do test -n "$d" && break; echo "ERROR: No such archive"; done
+    # DOGGOSDIR="${ARCH_DIR}/${d}"
+    # echo $DOGGOSDIR
 }
 
 while getopts ${OPTSTRING} opt; do
@@ -81,6 +92,13 @@ while getopts ${OPTSTRING} opt; do
             fi
             PRIDE_FLAG=1
             ;;
+        s) 
+            show_pups
+            exit 0
+            ;;
+        w)
+            DOGGOSDIR="$ARCH_DIR/$OPTARG"
+            ;;
         x)
             AIC_CL_FLAGS="${AIC_CL_FLAGS} --complex"
             ;;
@@ -91,6 +109,18 @@ while getopts ${OPTSTRING} opt; do
             ;;
     esac
 done
+
+PICTCOUNT=$(ls $DOGGOSDIR -l | wc -l)
+
+perpetual_pup() {
+    PICTCOUNT=$(ls "$1" -l | wc -l)
+    echo $PICTCOUNT
+    PICNUM=$(shuf -i 1-${PICTCOUNT} -n 1);
+    FILENAME="${1}/${PICNUM}.jpeg";
+    COMMAND="ascii-image-converter ${FILENAME} ${AIC_CL_FLAGS}"
+    printf "\nRunning:\n\t${COMMAND}\n"
+    eval "${COMMAND}"
+}
 
 if [ $DITHER_FLAG -eq 1 -a $BRAILLE_FLAG -eq 0 ]; then
     echo "ERROR: image dithering is only reserved for -b flag"
@@ -106,11 +136,11 @@ PICNUM=$(shuf -i 1-${PICTCOUNT} -n 1)
 FILENAME="${DOGGOSDIR}/${PICNUM}.jpeg"
 
 if [ ! $INDF_DELAY -eq 0 ]; then
-    echo "executing woof2.sh ${AIC_CL_FLAGS}"
-    /home/mfwolffe/Scripts/woof/woof2.sh "$AIC_CL_FLAGS"
-    # watch --color 'unbuffer ~/Scripts/woof2.sh'
+    echo "dude we are here"
+    export -f perpetual_pup
+    watch --color -x bash -c "perpetual_pup $DOGGOSDIR"
     exit 0
-fi
+fiC
 
 AIC_CL_FLAGS="${FILENAME} ${AIC_CL_FLAGS}"
 COMMAND="ascii-image-converter ${AIC_CL_FLAGS}"

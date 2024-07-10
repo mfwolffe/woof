@@ -1,20 +1,21 @@
 #!/bin/bash
 
+# SEEME @mfwolffe there are several issues with the "indefinite" flag
+#                 in no particular order, they are:
+#                   1) if a user wants to output with color, even when running
+#                      as `bash -c ...` it appears to default to sh 
+#                   2) braille mode is not working now. And that's my fault.
+#                   3)  
+
 test_watch() {
-    PICTCOUNT=$(ls /home/mfwolffe/Pictures/moby -l | wc -l)
+    PICTCOUNT=$(ls "$1" -l | wc -l)
     PICNUM=$(shuf -i 1-${PICTCOUNT} -n 1);
-    FILENAME="~/Pictures/moby/${PICNUM}.jpeg";
-    AIC_CL_FLAGS="${FILENAME} $@";
+    FILENAME="${1}/${PICNUM}.jpeg";
+    AIC_CL_FLAGS="${FILENAME} $2"
     COMMAND="ascii-image-converter ${AIC_CL_FLAGS}";
 
     echo "run: $COMMAND"
     eval "$COMMAND"
-
-    # if [ $PRIDE_FLAG -eq 1 ]; then
-    #     eval "$COMMAND | lolcat ";
-    #     else
-    #     eval "$COMMAND";
-    # fi
 }
 
 export -f test_watch
